@@ -111,14 +111,25 @@ class ShortenerHandler(BaseHTTPRequestHandler):
         linear_probing = isinstance(table, LinearProbingHashTable)
         strategy = "Linear probing" if linear_probing else "Separate chaining"
         location_label = "Slot" if linear_probing else "Bucket"
+        styles = (
+            "<style>"
+            ".chain{display:flex;align-items:center;gap:.5rem;list-style:none;"
+            "margin:.25rem 0;padding:.75rem;overflow-x:auto;background:#f5f7fa}"
+            ".chain-node{flex:0 0 18rem;overflow-wrap:anywhere;border:1px solid "
+            "#9aa7b5;border-radius:.35rem;padding:.75rem;background:white}"
+            ".chain-arrow{font-size:1.5rem;color:#526579}"
+            "</style>"
+        )
         rows = []
         for index in range(table.capacity):
             entries = table.items_at(index)
             if entries:
-                cells = []
+                nodes = []
                 for position, (key, value) in enumerate(entries):
                     calculation = _hash_explanation(key, table.capacity)
                     home = table.hash_details(key)[1]
+                    code = str(value)
+                    short_link = f"/{quote(code, safe='')}"
                     if linear_probing:
                         probe_path = table.probe_path(key)
                         path = " -> ".join(str(slot) for slot in probe_path)
@@ -132,14 +143,25 @@ class ShortenerHandler(BaseHTTPRequestHandler):
                             f"{position + 1} of {len(entries)}; nodes inspected: "
                             f"{position + 1}"
                         )
-                    cells.append(
-                        f"<div><code>{escape(key)}</code> -> "
-                        f"<code>{escape(str(value))}</code><details>"
+                    nodes.append(
+                        '<li class="chain-node">'
+                        f"<strong>URL key:</strong> <code>{escape(key)}</code><br>"
+                        f"<strong>Short code:</strong> <code>{escape(code)}</code><br>"
+                        f'<strong>Short link:</strong> <a href="{escape(short_link, quote=True)}">'
+                        f"{escape(short_link)}</a><details>"
                         f"<summary>Horner hash calculation</summary>"
                         f"<code>{escape(calculation)}</code><br>"
-                        f"{inspection}</details></div>"
+                        f"{inspection}</details></li>"
                     )
-                contents = "".join(cells)
+                    if position + 1 < len(entries):
+                        nodes.append(
+                            '<li class="chain-arrow" aria-hidden="true">&rarr;</li>'
+                        )
+                contents = (
+                    '<ol class="chain" aria-label="Linked-list nodes">'
+                    + "".join(nodes)
+                    + "</ol>"
+                )
             else:
                 contents = "<span>empty</span>"
             rows.append(
@@ -148,7 +170,8 @@ class ShortenerHandler(BaseHTTPRequestHandler):
         content = (
             f"<p>{strategy} table. Each populated cell shows its "
             f"{'probe path' if linear_probing else 'linked list'} and Horner hash calculation.</p>"
-            f"<table border=\"1\"><thead><tr><th>{location_label}</th>"
+            + styles
+            + f"<table border=\"1\"><thead><tr><th>{location_label}</th>"
             "<th>Entries</th></tr></thead><tbody>"
             + "".join(rows)
             + "</tbody></table>"

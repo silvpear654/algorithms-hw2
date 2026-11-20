@@ -49,7 +49,16 @@ class ShortenerServerTests(unittest.TestCase):
         response.read()
 
     def test_table_view_shows_chaining_and_hash_calculation(self):
-        self.server.shortener.shorten("https://example.com")
+        self.server.shortener = Shortener(capacity=5)
+        first_url = "https://a.com"
+        second_url = "https://f.com"
+        first_code = self.server.shortener.shorten(first_url)
+        second_code = self.server.shortener.shorten(second_url)
+        bucket = self.server.shortener.table.hash_details(first_url)[1]
+        self.assertEqual(
+            self.server.shortener.table.hash_details(second_url)[1], bucket
+        )
+
         self.connection.request("GET", "/table")
         response = self.connection.getresponse()
         body = response.read()
@@ -59,7 +68,11 @@ class ShortenerServerTests(unittest.TestCase):
         self.assertIn(b"Horner hash calculation", body)
         self.assertIn(b"chain position:", body)
         self.assertIn(b"nodes inspected:", body)
-        self.assertIn(b"https://example.com", body)
+        self.assertIn(b"https://a.com", body)
+        self.assertIn(b"https://f.com", body)
+        self.assertIn(b"&rarr;", body)
+        self.assertIn(f'href="/{first_code}"'.encode(), body)
+        self.assertIn(f'href="/{second_code}"'.encode(), body)
 
     def test_table_view_shows_linear_probe_path(self):
         self.server.shortener = Shortener(
