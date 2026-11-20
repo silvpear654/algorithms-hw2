@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>과제2 보고서</title>
+<style>
+  @page { size: A4; margin: 14mm 15mm; }
+  body { font-family: "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; font-size: 9.4pt; line-height: 1.45; color: #111; margin: 0; }
+  h1 { font-size: 14pt; margin: 0 0 2px; }
+  .meta { font-size: 8.8pt; color: #333; margin-bottom: 6px; border-bottom: 1px solid #999; padding-bottom: 4px; }
+  h2 { font-size: 11pt; margin: 9px 0 3px; border-left: 3px solid #1769aa; padding-left: 6px; }
+  p { margin: 2px 0 4px; }
+  ul { margin: 2px 0 4px; padding-left: 18px; }
+  li { margin: 1px 0; }
+  code { font-family: Menlo, monospace; font-size: 8.4pt; background: #f2f2f2; padding: 0 2px; }
+  table { border-collapse: collapse; width: 100%; font-size: 8.4pt; margin: 3px 0 4px; }
+  th, td { border: 1px solid #aaa; padding: 1px 4px; text-align: right; }
+  th { background: #eef2f6; text-align: center; }
+  td:first-child { text-align: center; }
+  .hi { background: #fdecee; }
+  figure { margin: 4px 0; text-align: center; }
+  figure img { width: 86%; }
+  figcaption { font-size: 8.2pt; color: #444; }
+  .page2 { page-break-before: always; }
+  .small { font-size: 8.4pt; color: #333; }
+</style>
+</head>
+<body>
+
+<h1>과제2 보고서 · 개별 체이닝과 선형 탐지 비교</h1>
+<div class="meta">
+  저장소: <b>https://github.com/silvpear654/algorithms-hw2</b> &nbsp;·&nbsp; 2026-2 고급알고리즘(SIT2001-01) &nbsp;·&nbsp; 김은배
+</div>
+
+<h2>1. 두 방식의 구현</h2>
+<ul>
+  <li><b>공통</b>: <code>src/hash_table.py</code>의 호너 해시 <code>h = h·31 + ord(c)</code>를 쓰고, 칸 번호는 <code>h mod M</code>이다. <code>dict</code>·<code>set</code>·내장 <code>hash()</code>는 쓰지 않았고 칸 수 M은 고정이다. 두 테이블은 같은 인터페이스(<code>insert</code>, <code>search</code>, <code>delete</code>, <code>len</code>)를 가지며, 연산마다 들여다본 노드/칸 수를 <code>last_probes</code>에 기록한다.</li>
+  <li><b>개별 체이닝</b> (<code>HashTable</code>): 칸마다 리스트를 두고 충돌한 키를 뒤에 붙인다. 탐색 비용은 비교한 노드 수이며, 빈 칸에서 실패하면 0회로 센다.</li>
+  <li><b>선형 탐지</b> (<code>LinearProbingHashTable</code>): 칸 하나에 키 하나를 저장하고, 충돌하면 <code>(h+1) mod M</code>, <code>(h+2) mod M</code> … 순서로 다음 칸을 본다. 끝 칸 다음은 0번 칸으로 넘어간다. 삭제한 칸은 비우지 않고 삭제 표시(tombstone)를 남겨, 그 뒤에 있는 키를 찾는 경로가 끊기지 않게 했다. 테이블이 가득 찬 상태에서 새 키를 넣으면 <code>OverflowError</code>를 낸다.</li>
+  <li><b>바꿔 끼우기</b>: <code>Shortener(table_type=...)</code>로 두 테이블 중 하나를 고른다. 단축 코드는 해시값이 아니라 증가하는 정수를 base62로 바꿔 만든다. 그래서 테이블 종류가 달라도 같은 URL은 같은 코드를 받는다. <code>make serve</code>는 두 테이블을 함께 띄우고, <code>/table</code>은 체이닝의 연결 리스트와 선형 탐지의 홈 칸·조사한 칸 경로·호너 계산식을 보여 준다. <code>make test</code>에서 23개 테스트가 통과한다(충돌, 덮어쓰기, 삭제, wraparound, 가득 찬 테이블 포함).</li>
+</ul>
+
+<h2>2. 실험 조건</h2>
+<ul>
+  <li>스크립트 <code>experiments/compare_experiment.py</code> (<code>make experiment</code>). 칸 수 <b>M = 2000</b>, 적재율 <b>α = 0.1 ~ 0.9</b>(0.1 간격), 시드를 바꿔 <b>20회 반복</b>한 뒤 평균을 냈다.</li>
+  <li>각 반복에서 <b>똑같은 키 목록</b>을 두 테이블에 같은 순서로 넣었다. 성공 탐색은 저장된 키를 한 번씩 찾고, 실패 탐색은 저장되지 않은 키를 같은 개수만큼 찾는다.</li>
+  <li>이론값: 체이닝 성공 1 + α/2, 실패 α. 선형 탐지 성공 ½(1 + 1/(1−α)), 실패 ½(1 + 1/(1−α)²).</li>
+</ul>
+
+<h2>3. 결과</h2>
+<table>
+  <thead>
+    <tr><th rowspan="2">α</th><th colspan="2">체이닝 성공</th><th colspan="2">체이닝 실패</th><th colspan="2">선형 탐지 성공</th><th colspan="2">선형 탐지 실패</th></tr>
+    <tr><th>측정</th><th>이론</th><th>측정</th><th>이론</th><th>측정</th><th>이론</th><th>측정</th><th>이론</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0.1</td><td>1.054</td><td>1.050</td><td>0.104</td><td>0.100</td><td>1.060</td><td>1.056</td><td>1.124</td><td>1.117</td></tr>
+    <tr><td>0.2</td><td>1.100</td><td>1.100</td><td>0.204</td><td>0.200</td><td>1.123</td><td>1.125</td><td>1.287</td><td>1.281</td></tr>
+    <tr><td>0.3</td><td>1.146</td><td>1.150</td><td>0.294</td><td>0.300</td><td>1.206</td><td>1.214</td><td>1.522</td><td>1.520</td></tr>
+    <tr><td>0.4</td><td>1.194</td><td>1.200</td><td>0.394</td><td>0.400</td><td>1.317</td><td>1.333</td><td>1.872</td><td>1.889</td></tr>
+    <tr><td>0.5</td><td>1.243</td><td>1.250</td><td>0.498</td><td>0.500</td><td>1.493</td><td>1.500</td><td>2.493</td><td>2.500</td></tr>
+    <tr><td>0.6</td><td>1.295</td><td>1.300</td><td>0.597</td><td>0.600</td><td>1.756</td><td>1.750</td><td>3.697</td><td>3.625</td></tr>
+    <tr><td>0.7</td><td>1.347</td><td>1.350</td><td>0.698</td><td>0.700</td><td>2.199</td><td>2.167</td><td>6.178</td><td>6.056</td></tr>
+    <tr class="hi"><td>0.8</td><td>1.395</td><td>1.400</td><td>0.797</td><td>0.800</td><td>3.052</td><td>3.000</td><td>13.904</td><td>13.000</td></tr>
+    <tr class="hi"><td>0.9</td><td>1.445</td><td>1.450</td><td>0.897</td><td>0.900</td><td>5.652</td><td>5.500</td><td>47.284</td><td>50.500</td></tr>
+  </tbody>
+</table>
+<p class="small">단위: 체이닝은 비교한 노드 수, 선형 탐지는 들여다본 칸 수(20회 평균). 그래프는 다음 쪽에 있다.</p>
+<p>체이닝은 α = 0.9까지 측정값이 이론값과 0.01 안쪽으로 맞고, 성공 탐색 비용은 1.45회를 넘지 않는다. 선형 탐지도 α ≤ 0.5에서는 이론값과 거의 같고 체이닝과 큰 차이가 없다. α = 0.7부터 차이가 벌어지기 시작해 <b>α = 0.9의 실패 탐색은 47.3칸</b>을 본다. 같은 조건에서 체이닝의 0.9회와 비교하면 약 50배다.</p>
+
+<div class="page2"></div>
+<figure>
+  <svg xmlns="http://www.w3.org/2000/svg" width="86%" viewBox="0 0 1000 800">
+<title>Chaining and linear probing search costs</title>
+<rect width="100%" height="100%" fill="white"/>
+<text x="500" y="30" text-anchor="middle" font-family="sans-serif" font-size="20">Measured and theoretical probe counts</text>
+<text x="90" y="53" font-family="sans-serif" font-size="15">Successful searches</text>
+<line x1="90" y1="340.0" x2="965" y2="340.0" stroke="#ddd"/>
+<text x="78" y="344.0" text-anchor="end" font-family="sans-serif" font-size="11">0</text>
+<line x1="90" y1="294.2" x2="965" y2="294.2" stroke="#ddd"/>
+<text x="78" y="298.2" text-anchor="end" font-family="sans-serif" font-size="11">1</text>
+<line x1="90" y1="248.3" x2="965" y2="248.3" stroke="#ddd"/>
+<text x="78" y="252.3" text-anchor="end" font-family="sans-serif" font-size="11">2</text>
+<line x1="90" y1="202.5" x2="965" y2="202.5" stroke="#ddd"/>
+<text x="78" y="206.5" text-anchor="end" font-family="sans-serif" font-size="11">3</text>
+<line x1="90" y1="156.7" x2="965" y2="156.7" stroke="#ddd"/>
+<text x="78" y="160.7" text-anchor="end" font-family="sans-serif" font-size="11">4</text>
+<line x1="90" y1="110.8" x2="965" y2="110.8" stroke="#ddd"/>
+<text x="78" y="114.8" text-anchor="end" font-family="sans-serif" font-size="11">5</text>
+<line x1="90" y1="65.0" x2="965" y2="65.0" stroke="#ddd"/>
+<text x="78" y="69.0" text-anchor="end" font-family="sans-serif" font-size="11">6</text>
+<line x1="90.0" y1="65" x2="90.0" y2="340" stroke="#eee"/>
+<text x="90.0" y="358" text-anchor="middle" font-family="sans-serif" font-size="10">0.1</text>
+<line x1="199.4" y1="65" x2="199.4" y2="340" stroke="#eee"/>
+<text x="199.4" y="358" text-anchor="middle" font-family="sans-serif" font-size="10">0.2</text>
+<line x1="308.8" y1="65" x2="308.8" y2="340" stroke="#eee"/>
+<text x="308.8" y="358" text-anchor="middle" font-family="sans-serif" font-size="10">0.3</text>
+<line x1="418.1" y1="65" x2="418.1" y2="340" stroke="#eee"/>
+<text x="418.1" y="358" text-anchor="middle" font-family="sans-serif" font-size="10">0.4</text>
+<line x1="527.5" y1="65" x2="527.5" y2="340" stroke="#eee"/>
+<text x="527.5" y="358" text-anchor="middle" font-family="sans-serif" font-size="10">0.5</text>
+<line x1="636.9" y1="65" x2="636.9" y2="340" stroke="#eee"/>
+<text x="636.9" y="358" text-anchor="middle" font-family="sans-serif" font-size="10">0.6</text>
+<line x1="746.2" y1="65" x2="746.2" y2="340" stroke="#eee"/>
+<text x="746.2" y="358" text-anchor="middle" font-family="sans-serif" font-size="10">0.7</text>
+<line x1="855.6" y1="65" x2="855.6" y2="340" stroke="#eee"/>
+<text x="855.6" y="358" text-anchor="middle" font-family="sans-serif" font-size="10">0.8</text>
+<line x1="965.0" y1="65" x2="965.0" y2="340" stroke="#eee"/>
+<text x="965.0" y="358" text-anchor="middle" font-family="sans-serif" font-size="10">0.9</text>
+<text x="527.5" y="374" text-anchor="middle" font-family="sans-serif" font-size="12">Load factor alpha</text>
+<polyline points="90.0,291.7 199.4,289.6 308.8,287.5 418.1,285.3 527.5,283.0 636.9,280.6 746.2,278.3 855.6,276.1 965.0,273.8" fill="none" stroke="#1769aa" stroke-width="2.5"/>
+<polyline points="90.0,291.9 199.4,289.6 308.8,287.3 418.1,285.0 527.5,282.7 636.9,280.4 746.2,278.1 855.6,275.8 965.0,273.5" fill="none" stroke="#1769aa" stroke-width="2.5" stroke-dasharray="6 4"/>
+<polyline points="90.0,291.4 199.4,288.5 308.8,284.7 418.1,279.6 527.5,271.6 636.9,259.5 746.2,239.2 855.6,200.1 965.0,80.9" fill="none" stroke="#d1495b" stroke-width="2.5"/>
+<polyline points="90.0,291.6 199.4,288.4 308.8,284.3 418.1,278.9 527.5,271.2 636.9,259.8 746.2,240.7 855.6,202.5 965.0,87.9" fill="none" stroke="#d1495b" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text x="90" y="398" font-family="sans-serif" font-size="15">Unsuccessful searches</text>
+<line x1="90" y1="685.0" x2="965" y2="685.0" stroke="#ddd"/>
+<text x="78" y="689.0" text-anchor="end" font-family="sans-serif" font-size="11">0</text>
+<line x1="90" y1="635.0" x2="965" y2="635.0" stroke="#ddd"/>
+<text x="78" y="639.0" text-anchor="end" font-family="sans-serif" font-size="11">10</text>
+<line x1="90" y1="585.0" x2="965" y2="585.0" stroke="#ddd"/>
+<text x="78" y="589.0" text-anchor="end" font-family="sans-serif" font-size="11">20</text>
+<line x1="90" y1="535.0" x2="965" y2="535.0" stroke="#ddd"/>
+<text x="78" y="539.0" text-anchor="end" font-family="sans-serif" font-size="11">30</text>
+<line x1="90" y1="485.0" x2="965" y2="485.0" stroke="#ddd"/>
+<text x="78" y="489.0" text-anchor="end" font-family="sans-serif" font-size="11">40</text>
+<line x1="90" y1="435.0" x2="965" y2="435.0" stroke="#ddd"/>
+<text x="78" y="439.0" text-anchor="end" font-family="sans-serif" font-size="11">50</text>
+<line x1="90.0" y1="410" x2="90.0" y2="685" stroke="#eee"/>
+<text x="90.0" y="703" text-anchor="middle" font-family="sans-serif" font-size="10">0.1</text>
+<line x1="199.4" y1="410" x2="199.4" y2="685" stroke="#eee"/>
+<text x="199.4" y="703" text-anchor="middle" font-family="sans-serif" font-size="10">0.2</text>
+<line x1="308.8" y1="410" x2="308.8" y2="685" stroke="#eee"/>
+<text x="308.8" y="703" text-anchor="middle" font-family="sans-serif" font-size="10">0.3</text>
+<line x1="418.1" y1="410" x2="418.1" y2="685" stroke="#eee"/>
+<text x="418.1" y="703" text-anchor="middle" font-family="sans-serif" font-size="10">0.4</text>
+<line x1="527.5" y1="410" x2="527.5" y2="685" stroke="#eee"/>
+<text x="527.5" y="703" text-anchor="middle" font-family="sans-serif" font-size="10">0.5</text>
+<line x1="636.9" y1="410" x2="636.9" y2="685" stroke="#eee"/>
+<text x="636.9" y="703" text-anchor="middle" font-family="sans-serif" font-size="10">0.6</text>
+<line x1="746.2" y1="410" x2="746.2" y2="685" stroke="#eee"/>
+<text x="746.2" y="703" text-anchor="middle" font-family="sans-serif" font-size="10">0.7</text>
+<line x1="855.6" y1="410" x2="855.6" y2="685" stroke="#eee"/>
+<text x="855.6" y="703" text-anchor="middle" font-family="sans-serif" font-size="10">0.8</text>
+<line x1="965.0" y1="410" x2="965.0" y2="685" stroke="#eee"/>
+<text x="965.0" y="703" text-anchor="middle" font-family="sans-serif" font-size="10">0.9</text>
+<text x="527.5" y="719" text-anchor="middle" font-family="sans-serif" font-size="12">Load factor alpha</text>
+<polyline points="90.0,684.5 199.4,684.0 308.8,683.5 418.1,683.0 527.5,682.5 636.9,682.0 746.2,681.5 855.6,681.0 965.0,680.5" fill="none" stroke="#1769aa" stroke-width="2.5"/>
+<polyline points="90.0,684.5 199.4,684.0 308.8,683.5 418.1,683.0 527.5,682.5 636.9,682.0 746.2,681.5 855.6,681.0 965.0,680.5" fill="none" stroke="#1769aa" stroke-width="2.5" stroke-dasharray="6 4"/>
+<polyline points="90.0,679.4 199.4,678.6 308.8,677.4 418.1,675.6 527.5,672.5 636.9,666.5 746.2,654.1 855.6,615.5 965.0,448.6" fill="none" stroke="#d1495b" stroke-width="2.5"/>
+<polyline points="90.0,679.4 199.4,678.6 308.8,677.4 418.1,675.6 527.5,672.5 636.9,666.9 746.2,654.7 855.6,620.0 965.0,432.5" fill="none" stroke="#d1495b" stroke-width="2.5" stroke-dasharray="6 4"/>
+<line x1="90" y1="731" x2="115" y2="731" stroke="#1769aa" stroke-width="2.5"/>
+<text x="122" y="735" font-family="sans-serif" font-size="12">Chaining measured</text>
+<line x1="490" y1="731" x2="515" y2="731" stroke="#1769aa" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text x="522" y="735" font-family="sans-serif" font-size="12">Chaining theory</text>
+<line x1="90" y1="753" x2="115" y2="753" stroke="#d1495b" stroke-width="2.5"/>
+<text x="122" y="757" font-family="sans-serif" font-size="12">Linear measured</text>
+<line x1="490" y1="753" x2="515" y2="753" stroke="#d1495b" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text x="522" y="757" font-family="sans-serif" font-size="12">Linear theory</text>
+</svg>
+
+  <figcaption>그림 1. 적재율별 탐색 비용. 위는 성공, 아래는 실패 탐색이다. 실선은 측정, 점선은 이론, 파랑은 체이닝, 빨강은 선형 탐지다.</figcaption>
+</figure>
+
+<h2>4. 해석</h2>
+<ul>
+  <li><b>선형 탐지가 α → 1에서 급격히 나빠지는 이유 (1차 군집, primary clustering)</b>: 선형 탐지에서는 충돌한 키가 바로 옆 칸을 차지한다. 그러면 연속으로 찬 칸 덩어리(run)가 생기고, 그 덩어리 안의 어느 칸에 해시된 키든 덩어리 끝까지 밀려나 덩어리를 한 칸 더 늘린다. 길이 k인 덩어리는 다음 키가 들어올 확률이 k+1에 비례하므로 큰 덩어리일수록 더 빨리 커진다. 실패 탐색은 빈 칸을 만날 때까지 덩어리를 끝까지 지나가야 하므로, 비용이 1/(1−α)²처럼 커진다. α = 0.9에서는 빈 칸이 10%뿐이고 덩어리끼리 붙어 매우 긴 구간이 생긴다.</li>
+  <li><b>체이닝과 다른 점</b>: 체이닝에서는 충돌한 키가 <b>자기 칸의 리스트</b>에만 쌓이고 다른 칸의 탐색에는 영향을 주지 않는다. 그래서 비용이 α에 대해 1차식으로 천천히 늘고, α &gt; 1이어도 동작한다(6단계 실험에서 α = 4까지 성공 3.01회, 실패 4.00회로 이론값과 맞았다). 반면 선형 탐지는 α ≤ 1이어야 하고, 가득 차면 넣을 수 없다. 대신 노드를 따로 만들지 않고 배열을 차례로 읽으므로, 적재율이 낮을 때(α ≤ 0.5)는 체이닝과 비슷한 비용으로 메모리를 덜 쓴다.</li>
+  <li><b>이론과 어긋나는 곳</b>: α = 0.8의 선형 실패 탐색은 이론보다 0.9칸 많고, α = 0.9는 3.2칸 적다. α가 1에 가까우면 덩어리 몇 개의 길이가 평균을 크게 좌우한다. 그래서 M = 2000, 20회 표본으로는 흔들림이 크다. 또 이론식은 M → ∞일 때의 근사식이다.</li>
+</ul>
+
+<h2>5. 에이전트가 틀린 곳과 고친 방법</h2>
+<ul>
+  <li><b>6단계 실험 조건이 과제와 달랐다.</b> 에이전트는 처음에 정해진 키 집합으로 실험하고, 이론값과 잘 맞는다며 이슈를 닫았다. 결과를 과제 안내와 비교해 보니 칸 수 4093, 무작위 URL, <code>results.csv</code> 저장 조건이 빠져 있었다. 조건을 다시 지정해 <code>HashTable(4093)</code>에 시드를 고정한 무작위 URL을 넣고 CSV와 SVG로 저장하게 고쳤다(커밋 <code>8ee56b4</code>).</li>
+  <li><b>서버가 127.0.0.1에만 바인딩되어 있었다.</b> 에이전트는 로컬에서 <code>/</code>와 <code>/table</code>이 200을 돌려주는 것만 확인하고 7단계를 완료했다고 보고했다. 그런데 이 주소에서는 Codespaces 포트 전달로 바깥(휴대폰)에서 접속할 수 없다. 점검할 때 이를 발견해 <code>0.0.0.0</code>으로 바꾸고, 기본 바인딩을 확인하는 회귀 테스트를 추가했다(커밋 <code>0f4304d</code>).</li>
+  <li><b>하지 않은 일을 끝난 것처럼 처리했다.</b> 1단계에서 체크리스트 항목(브라우저 채팅 AI와 비교)이 남아 있는데도 이슈를 닫았다. 체크리스트와 댓글을 대조해 다시 열고 상태를 바로잡았다. 이 경험으로 "테스트 통과"나 "완료" 보고를 그대로 믿지 않고, 이슈 체크리스트와 실제 결과물을 직접 대조하게 되었다.</li>
+</ul>
+<p class="small">남은 한계: 단축기의 테이블은 칸 수 101로 고정이라, 선형 탐지 단축기는 102번째 URL에서 <code>OverflowError</code>가 난다(체이닝은 계속 동작). 서버는 이 오류를 처리하지 않는다. 비교 실험의 키는 URL이 아니라 호너 해시값이 무작위 칸에 고르게 떨어지도록 만든 한 글자 문자열이다. 따라서 이 실험은 해시 함수 자체의 품질이 아니라 충돌 처리 방식의 차이만 비교한다.</p>
+
+</body>
+</html>
