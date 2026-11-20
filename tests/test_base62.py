@@ -7,6 +7,15 @@ class Base62Tests(unittest.TestCase):
     def test_zero_encodes_as_zero(self):
         self.assertEqual(encode(0), "0")
 
+    def test_digits_follow_the_specified_alphabet_order(self):
+        alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        for value, digit in enumerate(alphabet):
+            with self.subTest(value=value):
+                self.assertEqual(encode(value), digit)
+                self.assertEqual(decode(digit), value)
+        self.assertEqual(encode(62), "10")
+        self.assertEqual(decode("10"), 62)
+
     def test_round_trip(self):
         for number in (1, 61, 62, 3844, 2**128):
             with self.subTest(number=number):
