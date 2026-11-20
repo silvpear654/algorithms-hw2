@@ -19,9 +19,11 @@ def horner_hash(key: str) -> int:
 class HashTable:
     """A hash table using separate chaining and a polynomial Horner hash."""
 
-    def __init__(self, capacity: int = 101):
+    def __init__(self, capacity: int = 101, max_load: float | None = None):
         if isinstance(capacity, bool) or not isinstance(capacity, int) or capacity <= 0:
             raise ValueError("capacity must be a positive integer")
+        if max_load is not None:
+            raise ValueError("fixed-capacity hash tables require max_load=None")
         self._capacity = capacity
         self._buckets: list[list[tuple[str, object]]] = [
             [] for _ in range(capacity)

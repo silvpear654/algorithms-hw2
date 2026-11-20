@@ -21,7 +21,7 @@
 | --- | --- |
 | `SPEC.md` | URL 단축기와 해시 테이블의 동작 명세 |
 | `src/` · `tests/` | base62, 해시 테이블, 단축기, HTTP 서버와 그 테스트 |
-| `experiments/` | 두 해시 테이블의 탐색 비용 실험, 표·SVG 그래프, PDF 보고서 |
+| `experiments/` | 탐색 비용 실험, `results.csv` 표, SVG 그래프, PDF 보고서 |
 | `.github/copilot-instructions.md` | 구현 제약과 Git flow 작업 규칙 |
 | `tools/catchup.sh` | 수업 중 놓친 단계를 따라잡는 스크립트 |
 | `Makefile` | `make test` · `make serve` · `make experiment` |
