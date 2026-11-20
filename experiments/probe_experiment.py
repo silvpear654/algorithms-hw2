@@ -147,13 +147,10 @@ def svg_chart(rows: list[tuple[float, float, float]]) -> str:
     return "\n".join(parts) + "\n"
 
 
-def main() -> None:
-    rows = []
-    for load_factor in LOAD_FACTORS:
-        successful, unsuccessful = measure(load_factor)
-        rows.append((load_factor, successful, unsuccessful))
-
-    results_path = OUTPUT / "results.csv"
+def write_results(
+    rows: list[tuple[float, float, float]], output_dir: Path = OUTPUT
+) -> tuple[Path, Path]:
+    results_path = output_dir / "results.csv"
     with results_path.open("w", newline="", encoding="utf-8") as results_file:
         writer = csv.writer(results_file, lineterminator="\n")
         writer.writerow(
@@ -182,8 +179,18 @@ def main() -> None:
                 )
             )
 
-    graph_path = OUTPUT / "probe_experiment.svg"
+    graph_path = output_dir / "probe_experiment.svg"
     graph_path.write_text(svg_chart(rows), encoding="utf-8")
+    return results_path, graph_path
+
+
+def main() -> None:
+    rows = []
+    for load_factor in LOAD_FACTORS:
+        successful, unsuccessful = measure(load_factor)
+        rows.append((load_factor, successful, unsuccessful))
+
+    results_path, graph_path = write_results(rows)
     print(f"Wrote {results_path} and {graph_path}")
 
 
