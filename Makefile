@@ -9,7 +9,7 @@
 # 외부 라이브러리를 쓰지 않는다. Python 표준 모듈만으로 돈다.
 
 PORT ?= 8000
-STRATEGY ?= chaining
+STRATEGY ?= both
 
 .PHONY: all test serve experiment clean
 

@@ -35,8 +35,9 @@
 | 하고 싶은 것 | 명령 |
 | --- | --- |
 | 테스트 | `make test` |
-| 웹 서버 (포트 8000, 체이닝) | `make serve` |
-| 웹 서버 (선형 탐지) | `make serve STRATEGY=linear` |
+| 웹 서버 (포트 8000, 체이닝과 선형 탐지 함께 보기) | `make serve` |
+| 웹 서버 (체이닝만 보기) | `make serve STRATEGY=chaining` |
+| 웹 서버 (선형 탐지만 보기) | `make serve STRATEGY=linear` |
 | 충돌 실험 | `make experiment` |
 | 놓친 단계 따라잡기 | `sh tools/catchup.sh <단계 번호>` |
 

@@ -97,6 +97,35 @@ class ShortenerServerTests(unittest.TestCase):
         self.assertIn(b"probe path", body)
         self.assertIn(b"inspected slots:", body)
 
+    def test_both_tables_share_shortened_urls_and_render_together(self):
+        self.server.shortener = Shortener(capacity=5)
+        self.server.linear_shortener = Shortener(
+            table_type=LinearProbingHashTable, capacity=5
+        )
+        url = "https://example.com/both"
+
+        self.connection.request(
+            "POST",
+            "/shorten",
+            body=urlencode({"url": url}),
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        response = self.connection.getresponse()
+        self.assertEqual(response.status, 200)
+        self.assertIn(b'href="/0"', response.read())
+        self.assertEqual(self.server.shortener.expand("0"), url)
+        self.assertEqual(self.server.linear_shortener.expand("0"), url)
+
+        self.connection.request("GET", "/table")
+        response = self.connection.getresponse()
+        body = response.read()
+
+        self.assertEqual(response.status, 200)
+        self.assertIn(b"Separate chaining table", body)
+        self.assertIn(b"Linear probing table", body)
+        self.assertIn(b"inspected slots:", body)
+        self.assertIn(b"https://example.com/both", body)
+
     def test_invalid_input_and_unknown_codes_have_error_statuses(self):
         self.connection.request(
             "POST",
