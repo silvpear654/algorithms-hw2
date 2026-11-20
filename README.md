@@ -19,13 +19,14 @@
 
 | 파일 | 하는 일 |
 | --- | --- |
-| `SPEC.md` | 명세 틀. 에이전트가 초안을 쓰고 **본인이 고칩니다** |
-| `src/` · `tests/` · `experiments/` | 비어 있습니다. 수업에서 채웁니다 |
+| `SPEC.md` | URL 단축기와 해시 테이블의 동작 명세 |
+| `src/` · `tests/` | base62, 해시 테이블, 단축기, HTTP 서버와 그 테스트 |
+| `experiments/` | 체이닝 탐색 비용 실험과 생성된 표·SVG 그래프 |
+| `.github/copilot-instructions.md` | 구현 제약과 Git flow 작업 규칙 |
 | `tools/catchup.sh` | 수업 중 놓친 단계를 따라잡는 스크립트 |
 | `Makefile` | `make test` · `make serve` · `make experiment` |
 
-정답 코드는 들어 있지 않습니다. 에이전트는 작업 공간의 파일을 읽으므로, 정답이
-옆에 있으면 그대로 베껴 와서 연습이 되지 않습니다.
+핵심 구현은 외부 패키지 없이 Python 표준 모듈만 사용합니다.
 
 ## 명령
 
