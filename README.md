@@ -21,7 +21,7 @@
 | --- | --- |
 | `SPEC.md` | URL 단축기와 해시 테이블의 동작 명세 |
 | `src/` · `tests/` | base62, 해시 테이블, 단축기, HTTP 서버와 그 테스트 |
-| `experiments/` | 체이닝 탐색 비용 실험과 생성된 표·SVG 그래프 |
+| `experiments/` | 두 해시 테이블의 탐색 비용 실험, 표·SVG 그래프, PDF 보고서 |
 | `.github/copilot-instructions.md` | 구현 제약과 Git flow 작업 규칙 |
 | `tools/catchup.sh` | 수업 중 놓친 단계를 따라잡는 스크립트 |
 | `Makefile` | `make test` · `make serve` · `make experiment` |
@@ -35,7 +35,8 @@
 | 하고 싶은 것 | 명령 |
 | --- | --- |
 | 테스트 | `make test` |
-| 웹 서버 (포트 8000) | `make serve` |
+| 웹 서버 (포트 8000, 체이닝) | `make serve` |
+| 웹 서버 (선형 탐지) | `make serve STRATEGY=linear` |
 | 충돌 실험 | `make experiment` |
 | 놓친 단계 따라잡기 | `sh tools/catchup.sh <단계 번호>` |
 

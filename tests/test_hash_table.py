@@ -37,6 +37,7 @@ class LinearProbingHashTableTests(unittest.TestCase):
 
         self.assertEqual(table.items_at(4), (("c", 1),))
         self.assertEqual(table.items_at(0), (("h", 2),))
+        self.assertEqual(table.probe_path("h"), (4, 0))
         self.assertEqual(table.search("h"), 2)
         self.assertEqual(table.last_probes, 2)
 

@@ -3,7 +3,9 @@ import threading
 import unittest
 from urllib.parse import urlencode
 
+from src.hash_table import LinearProbingHashTable
 from src.server import create_server
+from src.shortener import Shortener
 
 
 class ShortenerServerTests(unittest.TestCase):
@@ -55,7 +57,23 @@ class ShortenerServerTests(unittest.TestCase):
         self.assertEqual(response.status, 200)
         self.assertIn(b"Separate chaining table", body)
         self.assertIn(b"Horner hash calculation", body)
+        self.assertIn(b"chain position:", body)
+        self.assertIn(b"nodes inspected:", body)
         self.assertIn(b"https://example.com", body)
+
+    def test_table_view_shows_linear_probe_path(self):
+        self.server.shortener = Shortener(
+            table_type=LinearProbingHashTable, capacity=5
+        )
+        self.server.shortener.shorten("https://example.com")
+        self.connection.request("GET", "/table")
+        response = self.connection.getresponse()
+        body = response.read()
+
+        self.assertEqual(response.status, 200)
+        self.assertIn(b"Linear probing table", body)
+        self.assertIn(b"probe path", body)
+        self.assertIn(b"inspected slots:", body)
 
     def test_invalid_input_and_unknown_codes_have_error_statuses(self):
         self.connection.request(

@@ -37,6 +37,10 @@ class HashTable:
         value = horner_hash(key)
         return value, value % self._capacity
 
+    def probe_path(self, key: str) -> tuple[int, ...]:
+        _, index = self.hash_details(key)
+        return (index,)
+
     def items_at(self, index: int) -> tuple[tuple[str, object], ...]:
         if not 0 <= index < self._capacity:
             raise IndexError("table index out of range")
@@ -96,6 +100,19 @@ class LinearProbingHashTable(HashTable):
         if not isinstance(slot, tuple):
             return ()
         return (slot,)
+
+    def probe_path(self, key: str) -> tuple[int, ...]:
+        _, start = self.hash_details(key)
+        path = []
+        for offset in range(self._capacity):
+            index = (start + offset) % self._capacity
+            path.append(index)
+            slot = self._slots[index]
+            if slot is None:
+                break
+            if isinstance(slot, tuple) and slot[0] == key:
+                break
+        return tuple(path)
 
     def insert(self, key: str, value: object) -> None:
         _, start = self.hash_details(key)
