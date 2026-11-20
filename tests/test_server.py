@@ -8,6 +8,15 @@ from src.server import create_server
 from src.shortener import Shortener
 
 
+class ServerBindingTests(unittest.TestCase):
+    def test_server_binds_all_interfaces_by_default(self):
+        server = create_server(port=0)
+        try:
+            self.assertEqual(server.server_address[0], "0.0.0.0")
+        finally:
+            server.server_close()
+
+
 class ShortenerServerTests(unittest.TestCase):
     def setUp(self):
         self.server = create_server(port=0)
