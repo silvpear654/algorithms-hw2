@@ -1,0 +1,304 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 7 0 R >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 8 0 R >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+7 0 obj
+<< /Length 2539 >>
+stream
+BT /F1 18 Tf 1 0 0 1 50.00 750.00 Tm (Hash table probe comparison) Tj ET
+BT /F1 10 Tf 1 0 0 1 50.00 728.00 Tm (Chaining vs. linear probing at load factors 0.1 through 0.9) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 704.00 Tm (Method: fixed capacity 2,000; 20 seeded trials use identical keys for both tables) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 690.00 Tm (and Horner hash \(multiplier 31\). Entries are inserted once; counts are average) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 676.00 Tm (nodes inspected \(chaining\) or slots inspected \(linear probing\).) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 650.00 Tm (Theory: chaining success 1+alpha/2, failure alpha; linear success) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 636.00 Tm (0.5*\(1+1/\(1-alpha\)\), failure 0.5*\(1+1/\(1-alpha\)^2\).) Tj ET
+BT /F2 9 Tf 1 0 0 1 50.00 600.00 Tm (alpha | chain S obs/theory | chain U obs/theory | linear S obs/theory | linear U obs/theory) Tj ET
+BT /F2 9 Tf 1 0 0 1 50.00 584.00 Tm (------+--------------------+--------------------+----------------------+----------------------) Tj ET
+BT /F2 8 Tf 1 0 0 1 50.00 564.00 Tm (0.1   | 1.05/1.05          | 0.10/0.10          | 1.06/1.06            | 1.12/1.12) Tj ET
+BT /F2 8 Tf 1 0 0 1 50.00 547.00 Tm (0.2   | 1.10/1.10          | 0.20/0.20          | 1.12/1.12            | 1.29/1.28) Tj ET
+BT /F2 8 Tf 1 0 0 1 50.00 530.00 Tm (0.3   | 1.15/1.15          | 0.29/0.30          | 1.21/1.21            | 1.52/1.52) Tj ET
+BT /F2 8 Tf 1 0 0 1 50.00 513.00 Tm (0.4   | 1.19/1.20          | 0.39/0.40          | 1.32/1.33            | 1.87/1.89) Tj ET
+BT /F2 8 Tf 1 0 0 1 50.00 496.00 Tm (0.5   | 1.24/1.25          | 0.50/0.50          | 1.49/1.50            | 2.49/2.50) Tj ET
+BT /F2 8 Tf 1 0 0 1 50.00 479.00 Tm (0.6   | 1.30/1.30          | 0.60/0.60          | 1.76/1.75            | 3.70/3.62) Tj ET
+BT /F2 8 Tf 1 0 0 1 50.00 462.00 Tm (0.7   | 1.35/1.35          | 0.70/0.70          | 2.20/2.17            | 6.18/6.06) Tj ET
+BT /F2 8 Tf 1 0 0 1 50.00 445.00 Tm (0.8   | 1.39/1.40          | 0.80/0.80          | 3.05/3.00            | 13.90/13.00) Tj ET
+BT /F2 8 Tf 1 0 0 1 50.00 428.00 Tm (0.9   | 1.44/1.45          | 0.90/0.90          | 5.65/5.50            | 47.28/50.50) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 385.00 Tm (Observed values differ slightly from theory because the table is finite and) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 371.00 Tm (the seeded bucket assignments have a realized, rather than perfectly uniform,) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 357.00 Tm (occupancy distribution. The same keys isolate the collision strategy effect.) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Length 5230 >>
+stream
+BT /F1 17 Tf 1 0 0 1 50.00 750.00 Tm (Results and interpretation) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 728.00 Tm (Solid lines are measured; dashed lines are theory. Blue is chaining, red is linear.) Tj ET
+BT /F1 12 Tf 1 0 0 1 80.00 698.00 Tm (Successful searches) Tj ET
+0.85 G 0.5 w
+80 460.00 m 560 460.00 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 457.00 Tm (0) Tj ET
+0.85 G 0.5 w
+80 496.67 m 560 496.67 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 493.67 Tm (1) Tj ET
+0.85 G 0.5 w
+80 533.33 m 560 533.33 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 530.33 Tm (2) Tj ET
+0.85 G 0.5 w
+80 570.00 m 560 570.00 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 567.00 Tm (3) Tj ET
+0.85 G 0.5 w
+80 606.67 m 560 606.67 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 603.67 Tm (4) Tj ET
+0.85 G 0.5 w
+80 643.33 m 560 643.33 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 640.33 Tm (5) Tj ET
+0.85 G 0.5 w
+80 680.00 m 560 680.00 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 677.00 Tm (6) Tj ET
+0.92 G 0.4 w
+80.00 460 m 80.00 680 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 72.00 445.00 Tm (0.1) Tj ET
+0.92 G 0.4 w
+140.00 460 m 140.00 680 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 132.00 445.00 Tm (0.2) Tj ET
+0.92 G 0.4 w
+200.00 460 m 200.00 680 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 192.00 445.00 Tm (0.3) Tj ET
+0.92 G 0.4 w
+260.00 460 m 260.00 680 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 252.00 445.00 Tm (0.4) Tj ET
+0.92 G 0.4 w
+320.00 460 m 320.00 680 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 312.00 445.00 Tm (0.5) Tj ET
+0.92 G 0.4 w
+380.00 460 m 380.00 680 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 372.00 445.00 Tm (0.6) Tj ET
+0.92 G 0.4 w
+440.00 460 m 440.00 680 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 432.00 445.00 Tm (0.7) Tj ET
+0.92 G 0.4 w
+500.00 460 m 500.00 680 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 492.00 445.00 Tm (0.8) Tj ET
+0.92 G 0.4 w
+560.00 460 m 560.00 680 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 552.00 445.00 Tm (0.9) Tj ET
+0 G 0.8 w
+80 460 m 560 460 l S
+80 460 m 80 680 l S
+0.09 0.41 0.67 RG 1.6 w
+[] 0 d
+80.00 498.65 m
+140.00 500.33 l
+200.00 502.04 l
+260.00 503.79 l
+320.00 505.57 l
+380.00 507.49 l
+440.00 509.37 l
+500.00 511.15 l
+560.00 512.97 l
+S
+0.09 0.41 0.67 RG 1.6 w
+[4 3] 0 d
+80.00 498.50 m
+140.00 500.33 l
+200.00 502.17 l
+260.00 504.00 l
+320.00 505.83 l
+380.00 507.67 l
+440.00 509.50 l
+500.00 511.33 l
+560.00 513.17 l
+S
+0.82 0.29 0.35 RG 1.6 w
+[] 0 d
+80.00 498.86 m
+140.00 501.16 l
+200.00 504.22 l
+260.00 508.29 l
+320.00 514.74 l
+380.00 524.38 l
+440.00 540.64 l
+500.00 571.91 l
+560.00 667.24 l
+S
+0.82 0.29 0.35 RG 1.6 w
+[4 3] 0 d
+80.00 498.70 m
+140.00 501.25 l
+200.00 504.52 l
+260.00 508.89 l
+320.00 515.00 l
+380.00 524.17 l
+440.00 539.44 l
+500.00 570.00 l
+560.00 661.67 l
+S
+[] 0 d 0 G
+BT /F1 9 Tf 1 0 0 1 285.00 431.00 Tm (Load factor alpha) Tj ET
+BT /F1 12 Tf 1 0 0 1 80.00 408.00 Tm (Unsuccessful searches) Tj ET
+0.85 G 0.5 w
+80 170.00 m 560 170.00 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 167.00 Tm (0) Tj ET
+0.85 G 0.5 w
+80 210.00 m 560 210.00 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 207.00 Tm (10) Tj ET
+0.85 G 0.5 w
+80 250.00 m 560 250.00 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 247.00 Tm (20) Tj ET
+0.85 G 0.5 w
+80 290.00 m 560 290.00 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 287.00 Tm (30) Tj ET
+0.85 G 0.5 w
+80 330.00 m 560 330.00 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 327.00 Tm (40) Tj ET
+0.85 G 0.5 w
+80 370.00 m 560 370.00 l S
+0 G
+BT /F1 8 Tf 1 0 0 1 56.00 367.00 Tm (50) Tj ET
+0.92 G 0.4 w
+80.00 170 m 80.00 390 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 72.00 155.00 Tm (0.1) Tj ET
+0.92 G 0.4 w
+140.00 170 m 140.00 390 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 132.00 155.00 Tm (0.2) Tj ET
+0.92 G 0.4 w
+200.00 170 m 200.00 390 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 192.00 155.00 Tm (0.3) Tj ET
+0.92 G 0.4 w
+260.00 170 m 260.00 390 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 252.00 155.00 Tm (0.4) Tj ET
+0.92 G 0.4 w
+320.00 170 m 320.00 390 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 312.00 155.00 Tm (0.5) Tj ET
+0.92 G 0.4 w
+380.00 170 m 380.00 390 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 372.00 155.00 Tm (0.6) Tj ET
+0.92 G 0.4 w
+440.00 170 m 440.00 390 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 432.00 155.00 Tm (0.7) Tj ET
+0.92 G 0.4 w
+500.00 170 m 500.00 390 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 492.00 155.00 Tm (0.8) Tj ET
+0.92 G 0.4 w
+560.00 170 m 560.00 390 l S
+0 G
+BT /F1 7 Tf 1 0 0 1 552.00 155.00 Tm (0.9) Tj ET
+0 G 0.8 w
+80 170 m 560 170 l S
+80 170 m 80 390 l S
+0.09 0.41 0.67 RG 1.6 w
+[] 0 d
+80.00 170.42 m
+140.00 170.82 l
+200.00 171.18 l
+260.00 171.57 l
+320.00 171.99 l
+380.00 172.39 l
+440.00 172.79 l
+500.00 173.19 l
+560.00 173.59 l
+S
+0.09 0.41 0.67 RG 1.6 w
+[4 3] 0 d
+80.00 170.40 m
+140.00 170.80 l
+200.00 171.20 l
+260.00 171.60 l
+320.00 172.00 l
+380.00 172.40 l
+440.00 172.80 l
+500.00 173.20 l
+560.00 173.60 l
+S
+0.82 0.29 0.35 RG 1.6 w
+[] 0 d
+80.00 174.50 m
+140.00 175.15 l
+200.00 176.09 l
+260.00 177.49 l
+320.00 179.97 l
+380.00 184.79 l
+440.00 194.71 l
+500.00 225.62 l
+560.00 359.14 l
+S
+0.82 0.29 0.35 RG 1.6 w
+[4 3] 0 d
+80.00 174.47 m
+140.00 175.12 l
+200.00 176.08 l
+260.00 177.56 l
+320.00 180.00 l
+380.00 184.50 l
+440.00 194.22 l
+500.00 222.00 l
+560.00 372.00 l
+S
+[] 0 d 0 G
+BT /F1 9 Tf 1 0 0 1 285.00 141.00 Tm (Load factor alpha) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 105.00 Tm (At moderate load, measured values track the estimates. As alpha approaches 1,) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 91.00 Tm (linear probing rises sharply: long occupied runs cause primary clustering.) Tj ET
+BT /F1 9 Tf 1 0 0 1 50.00 77.00 Tm (Chaining grows much more gradually. The comparison uses identical keys and capacity.) Tj ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000263 00000 n 
+0000000399 00000 n 
+0000000469 00000 n 
+0000000537 00000 n 
+0000003128 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+8410
+%%EOF
