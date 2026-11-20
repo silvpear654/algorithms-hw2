@@ -24,7 +24,10 @@ class ChainedHashTableTests(unittest.TestCase):
             with self.subTest(capacity=capacity):
                 with self.assertRaises(ValueError):
                     HashTable(capacity=capacity)
-        table = HashTable(capacity=3)
+        table = HashTable(capacity=3, max_load=None)
+        self.assertEqual(table.capacity, 3)
+        with self.assertRaises(ValueError):
+            HashTable(capacity=3, max_load=0.75)
         with self.assertRaises(TypeError):
             table.insert(1, "value")
 
