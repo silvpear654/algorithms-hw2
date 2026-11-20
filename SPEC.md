@@ -1,30 +1,67 @@
-# 명세: URL 단축기
+# URL shortener specification
 
-<!-- TEMPLATE: 이 줄은 지우세요. 지우지 않은 SPEC.md는 tools/catchup.sh가 샘플로 덮어씁니다. -->
+## 1. Purpose
 
-초안은 에이전트가 쓰고, **본인이 읽고 고칩니다.** 무엇을 고쳤는지는 이슈에 댓글로 남깁니다.
-에이전트는 이 파일을 읽고 구현합니다. 여기 적지 않은 것은 에이전트가 마음대로 정합니다.
+The program accepts an absolute HTTP or HTTPS URL and returns a short code. The
+code can later be expanded to the original URL. The implementation uses
+hand-written hash tables to store the mapping.
 
-## 1. 무엇을 만드는가
+## 2. Base62 encoding
 
-<!-- 한두 문장. 누가, 무엇을 넣으면, 무엇이 나오는가 -->
+`src/base62.py` provides `encode(number: int) -> str` and
+`decode(code: str) -> int`. The alphabet is `0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`,
+in that order. Zero encodes as `"0"`. Negative, non-integer, empty, and
+non-alphabet inputs raise `ValueError`.
 
-## 2. base62 인코딩
+## 3. Hash tables
 
-<!-- 함수 이름과 입력·출력. 글자 순서(0-9, a-z, A-Z?). 0은? 음수는? 잘못된 글자는? -->
+`HashTable(capacity=...)` uses separate chaining and a fixed positive capacity.
+`LinearProbingHashTable(capacity=...)` uses open addressing with linear probing
+and the same interface. Both use a polynomial Horner hash with multiplier 31
+over Unicode code points; the table index is the hash value modulo capacity.
+Neither implementation uses Python's `dict`, `set`, or built-in `hash()`.
 
-## 3. 해시 테이블
+`insert(key, value)` adds a key or replaces its value. `search(key)` returns
+the value or `None` when absent. `delete(key)` returns whether a key existed.
+`len(table)` is the number of stored keys. Every search/insert/delete records
+the number of inspected nodes or slots in `last_probes`; an unsuccessful
+chained search in an empty bucket inspects zero nodes. A linear-probing table
+raises `OverflowError` when inserting a new key into a full table. Both reject
+non-string keys with `TypeError`; capacity must be a positive integer.
 
-<!-- 충돌 처리 방식, 해시 함수, 처음 크기, 언제 늘리는가, 쓰면 안 되는 것 -->
+## 4. Shortener
 
-## 4. 단축기
+`Shortener` provides `shorten(url) -> str` and `expand(code) -> str`. It accepts
+only absolute `http` and `https` URLs with a hostname. Re-shortening the same
+URL returns its original code. Codes are assigned from an increasing integer
+sequence encoded in base62, not derived from a hash value. Invalid URLs or
+codes raise `ValueError`; an unknown but syntactically valid code raises
+`KeyError`.
 
-<!-- shorten(url)과 expand(code). 같은 URL을 두 번 넣으면? 없는 코드는? 잘못된 URL은? -->
+## 5. Web server
 
-## 5. 웹 서버
+`make serve` runs an HTTP server on port 8000 by default; `PORT` can override
+the port. `GET /` serves the URL input form. `POST /shorten` accepts a
+form-encoded `url` and returns a page containing its short link. `GET /<code>`
+redirects to the expanded URL, and `GET /table` renders the current chained
+table including bucket contents, inspected cells, and the Horner-hash
+calculation. Unknown routes return 404 and invalid input returns 400.
 
-<!-- 어떤 주소로 무엇을 요청하면 무엇이 돌아오는가 -->
+## 6. Boundary cases
 
-## 6. 경계 사례
+- Base62 zero, alphabet boundary values, large integers, negative values,
+  empty strings, and invalid characters.
+- Hash table capacity validation, collisions, updates, absent keys, deletion,
+  wraparound from the final slot to slot zero, and a full linear-probing table.
+- Shortening repeated URLs, invalid URL schemes/hosts, generated code zero,
+  invalid codes, and unknown valid codes.
+- Server form input validation, redirects, table inspection, and unknown paths.
 
-<!-- 테스트로 옮길 것들을 목록으로. 많을수록 좋습니다 -->
+## Decisions recorded from reviewing the draft
+
+- Codes come from a monotonic counter rather than hash values, so collisions in
+  the storage table do not affect short-code uniqueness.
+- The tables have fixed capacities, making load factor and probe counts
+  observable and allowing the linear-probing full-table boundary to be tested.
+- Duplicate URLs are idempotent, while malformed URLs and unknown codes have
+  distinct error behavior.
