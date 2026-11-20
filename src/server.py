@@ -5,18 +5,19 @@ from html import escape
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qsl, quote, unquote, urlsplit
 
+from src.hash_table import HashTable, LinearProbingHashTable
 from src.shortener import Shortener
 
 MAX_FORM_BYTES = 16_384
 
 
-def _hash_explanation(key: str, capacity: int, index: int) -> str:
+def _hash_explanation(key: str, capacity: int) -> str:
     value = 0
     expression = "0"
     for character in key:
         value = value * 31 + ord(character)
         expression = f"({expression} * 31 + {ord(character)})"
-    return f"{expression} = {value}; {value} % {capacity} = {index}"
+    return f"{expression} = {value}; {value} % {capacity} = {value % capacity}"
 
 
 class ShortenerHandler(BaseHTTPRequestHandler):
@@ -107,18 +108,36 @@ class ShortenerHandler(BaseHTTPRequestHandler):
 
     def _render_table(self) -> None:
         table = self.server.shortener.table
+        linear_probing = isinstance(table, LinearProbingHashTable)
+        strategy = "Linear probing" if linear_probing else "Separate chaining"
+        location_label = "Slot" if linear_probing else "Bucket"
         rows = []
         for index in range(table.capacity):
             entries = table.items_at(index)
             if entries:
                 cells = []
-                for key, value in entries:
-                    calculation = _hash_explanation(key, table.capacity, index)
+                for position, (key, value) in enumerate(entries):
+                    calculation = _hash_explanation(key, table.capacity)
+                    home = table.hash_details(key)[1]
+                    if linear_probing:
+                        probe_path = table.probe_path(key)
+                        path = " -> ".join(str(slot) for slot in probe_path)
+                        inspection = (
+                            f"Home slot: {home}; inspected slots: "
+                            f"<code>{escape(path)}</code> ({len(probe_path)} probes)"
+                        )
+                    else:
+                        inspection = (
+                            f"Bucket: {home}; chain position: "
+                            f"{position + 1} of {len(entries)}; nodes inspected: "
+                            f"{position + 1}"
+                        )
                     cells.append(
                         f"<div><code>{escape(key)}</code> -> "
                         f"<code>{escape(str(value))}</code><details>"
                         f"<summary>Horner hash calculation</summary>"
-                        f"<code>{escape(calculation)}</code></details></div>"
+                        f"<code>{escape(calculation)}</code><br>"
+                        f"{inspection}</details></div>"
                     )
                 contents = "".join(cells)
             else:
@@ -127,9 +146,9 @@ class ShortenerHandler(BaseHTTPRequestHandler):
                 f"<tr><th scope=\"row\">{index}</th><td>{contents}</td></tr>"
             )
         content = (
-            "<p>Separate chaining table. Each populated cell shows its linked "
-            "list and Horner hash calculation.</p>"
-            "<table border=\"1\"><thead><tr><th>Bucket</th>"
+            f"<p>{strategy} table. Each populated cell shows its "
+            f"{'probe path' if linear_probing else 'linked list'} and Horner hash calculation.</p>"
+            f"<table border=\"1\"><thead><tr><th>{location_label}</th>"
             "<th>Entries</th></tr></thead><tbody>"
             + "".join(rows)
             + "</tbody></table>"
@@ -143,16 +162,26 @@ class ShortenerHTTPServer(HTTPServer):
         self.shortener = shortener if shortener is not None else Shortener()
 
 
-def create_server(host: str = "127.0.0.1", port: int = 8000) -> ShortenerHTTPServer:
-    return ShortenerHTTPServer((host, port))
+def create_server(
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    shortener: Shortener | None = None,
+) -> ShortenerHTTPServer:
+    return ShortenerHTTPServer((host, port), shortener)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the URL shortener web server")
     parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument(
+        "--strategy", choices=("chaining", "linear"), default="chaining"
+    )
     args = parser.parse_args()
-    server = create_server(port=args.port)
-    print(f"Serving on http://127.0.0.1:{args.port}")
+    table_type = HashTable if args.strategy == "chaining" else LinearProbingHashTable
+    server = create_server(
+        port=args.port, shortener=Shortener(table_type=table_type)
+    )
+    print(f"Serving on http://127.0.0.1:{args.port} ({args.strategy})")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -43,9 +43,10 @@ codes raise `ValueError`; an unknown but syntactically valid code raises
 `make serve` runs an HTTP server on port 8000 by default; `PORT` can override
 the port. `GET /` serves the URL input form. `POST /shorten` accepts a
 form-encoded `url` and returns a page containing its short link. `GET /<code>`
-redirects to the expanded URL, and `GET /table` renders the current chained
-table including bucket contents, inspected cells, and the Horner-hash
-calculation. Unknown routes return 404 and invalid input returns 400.
+redirects to the expanded URL, and `GET /table` renders the selected table with
+its cell contents, Horner-hash calculation, and inspected slots. Start with
+`make serve STRATEGY=linear` to inspect the linear-probing table. Unknown routes
+return 404 and invalid input returns 400.
 
 ## 6. Boundary cases
 
