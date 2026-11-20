@@ -94,6 +94,10 @@ class ShortenerHandler(BaseHTTPRequestHandler):
             return
         try:
             code = self.server.shortener.shorten(urls[0])
+            if self.server.linear_shortener is not None:
+                linear_code = self.server.linear_shortener.shorten(urls[0])
+                if linear_code != code:
+                    raise RuntimeError("shortener tables generated different codes")
         except ValueError:
             self._send_html(400, self._page("Invalid URL", "<p>Enter a valid HTTP(S) URL.</p>"))
             return
@@ -107,10 +111,9 @@ class ShortenerHandler(BaseHTTPRequestHandler):
         self._send_html(200, self._page("URL shortened", content))
 
     def _render_table(self) -> None:
-        table = self.server.shortener.table
-        linear_probing = isinstance(table, LinearProbingHashTable)
-        strategy = "Linear probing" if linear_probing else "Separate chaining"
-        location_label = "Slot" if linear_probing else "Bucket"
+        tables = [self.server.shortener.table]
+        if self.server.linear_shortener is not None:
+            tables.append(self.server.linear_shortener.table)
         styles = (
             "<style>"
             ".chain{display:flex;align-items:center;gap:.5rem;list-style:none;"
@@ -120,89 +123,114 @@ class ShortenerHandler(BaseHTTPRequestHandler):
             ".chain-arrow{font-size:1.5rem;color:#526579}"
             "</style>"
         )
-        rows = []
-        for index in range(table.capacity):
-            entries = table.items_at(index)
-            if entries:
-                nodes = []
-                for position, (key, value) in enumerate(entries):
-                    calculation = _hash_explanation(key, table.capacity)
-                    home = table.hash_details(key)[1]
-                    code = str(value)
-                    short_link = f"/{quote(code, safe='')}"
-                    if linear_probing:
-                        probe_path = table.probe_path(key)
-                        path = " -> ".join(str(slot) for slot in probe_path)
-                        inspection = (
-                            f"Home slot: {home}; inspected slots: "
-                            f"<code>{escape(path)}</code> ({len(probe_path)} probes)"
-                        )
-                    else:
-                        inspection = (
-                            f"Bucket: {home}; chain position: "
-                            f"{position + 1} of {len(entries)}; nodes inspected: "
-                            f"{position + 1}"
-                        )
-                    nodes.append(
-                        '<li class="chain-node">'
-                        f"<strong>URL key:</strong> <code>{escape(key)}</code><br>"
-                        f"<strong>Short code:</strong> <code>{escape(code)}</code><br>"
-                        f'<strong>Short link:</strong> <a href="{escape(short_link, quote=True)}">'
-                        f"{escape(short_link)}</a><details>"
-                        f"<summary>Horner hash calculation</summary>"
-                        f"<code>{escape(calculation)}</code><br>"
-                        f"{inspection}</details></li>"
-                    )
-                    if position + 1 < len(entries):
+        sections = []
+        for table in tables:
+            linear_probing = isinstance(table, LinearProbingHashTable)
+            strategy = "Linear probing" if linear_probing else "Separate chaining"
+            location_label = "Slot" if linear_probing else "Bucket"
+            rows = []
+            for index in range(table.capacity):
+                entries = table.items_at(index)
+                if entries:
+                    nodes = []
+                    for position, (key, value) in enumerate(entries):
+                        calculation = _hash_explanation(key, table.capacity)
+                        home = table.hash_details(key)[1]
+                        code = str(value)
+                        short_link = f"/{quote(code, safe='')}"
+                        if linear_probing:
+                            probe_path = table.probe_path(key)
+                            path = " -> ".join(str(slot) for slot in probe_path)
+                            inspection = (
+                                f"Home slot: {home}; inspected slots: "
+                                f"<code>{escape(path)}</code> "
+                                f"({len(probe_path)} probes)"
+                            )
+                        else:
+                            inspection = (
+                                f"Bucket: {home}; chain position: "
+                                f"{position + 1} of {len(entries)}; nodes inspected: "
+                                f"{position + 1}"
+                            )
                         nodes.append(
-                            '<li class="chain-arrow" aria-hidden="true">&rarr;</li>'
+                            '<li class="chain-node">'
+                            f"<strong>URL key:</strong> <code>{escape(key)}</code><br>"
+                            f"<strong>Short code:</strong> <code>{escape(code)}</code><br>"
+                            f'<strong>Short link:</strong> <a href="{escape(short_link, quote=True)}">'
+                            f"{escape(short_link)}</a><details>"
+                            f"<summary>Horner hash calculation</summary>"
+                            f"<code>{escape(calculation)}</code><br>"
+                            f"{inspection}</details></li>"
                         )
-                contents = (
-                    '<ol class="chain" aria-label="Linked-list nodes">'
-                    + "".join(nodes)
-                    + "</ol>"
+                        if position + 1 < len(entries):
+                            nodes.append(
+                                '<li class="chain-arrow" aria-hidden="true">&rarr;</li>'
+                            )
+                    contents = (
+                        '<ol class="chain" aria-label="Linked-list nodes">'
+                        + "".join(nodes)
+                        + "</ol>"
+                    )
+                else:
+                    contents = "<span>empty</span>"
+                rows.append(
+                    f"<tr><th scope=\"row\">{index}</th><td>{contents}</td></tr>"
                 )
-            else:
-                contents = "<span>empty</span>"
-            rows.append(
-                f"<tr><th scope=\"row\">{index}</th><td>{contents}</td></tr>"
+            sections.append(
+                f"<section><h2>{strategy} table</h2>"
+                f"<p>Each populated cell shows its "
+                f"{'probe path' if linear_probing else 'linked list'} "
+                "and Horner hash calculation.</p>"
+                + f"<table border=\"1\"><thead><tr><th>{location_label}</th>"
+                "<th>Entries</th></tr></thead><tbody>"
+                + "".join(rows)
+                + "</tbody></table></section>"
             )
-        content = (
-            f"<p>{strategy} table. Each populated cell shows its "
-            f"{'probe path' if linear_probing else 'linked list'} and Horner hash calculation.</p>"
-            + styles
-            + f"<table border=\"1\"><thead><tr><th>{location_label}</th>"
-            "<th>Entries</th></tr></thead><tbody>"
-            + "".join(rows)
-            + "</tbody></table>"
-        )
+        content = styles + "".join(sections)
         self._send_html(200, self._page("Hash table inspection", content))
 
 
 class ShortenerHTTPServer(HTTPServer):
-    def __init__(self, address: tuple[str, int], shortener: Shortener | None = None):
+    def __init__(
+        self,
+        address: tuple[str, int],
+        shortener: Shortener | None = None,
+        linear_shortener: Shortener | None = None,
+    ):
         super().__init__(address, ShortenerHandler)
         self.shortener = shortener if shortener is not None else Shortener()
+        self.linear_shortener = linear_shortener
 
 
 def create_server(
     host: str = "0.0.0.0",
     port: int = 8000,
     shortener: Shortener | None = None,
+    linear_shortener: Shortener | None = None,
 ) -> ShortenerHTTPServer:
-    return ShortenerHTTPServer((host, port), shortener)
+    return ShortenerHTTPServer((host, port), shortener, linear_shortener)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the URL shortener web server")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument(
-        "--strategy", choices=("chaining", "linear"), default="chaining"
+        "--strategy", choices=("chaining", "linear", "both"), default="both"
     )
     args = parser.parse_args()
-    table_type = HashTable if args.strategy == "chaining" else LinearProbingHashTable
+    linear_shortener = None
+    if args.strategy == "both":
+        shortener = Shortener(table_type=HashTable)
+        linear_shortener = Shortener(table_type=LinearProbingHashTable)
+    else:
+        table_type = (
+            HashTable if args.strategy == "chaining" else LinearProbingHashTable
+        )
+        shortener = Shortener(table_type=table_type)
     server = create_server(
-        port=args.port, shortener=Shortener(table_type=table_type)
+        port=args.port,
+        shortener=shortener,
+        linear_shortener=linear_shortener,
     )
     print(f"Serving on http://127.0.0.1:{args.port} ({args.strategy})")
     try:
