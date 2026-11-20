@@ -70,7 +70,7 @@
 
 <div class="page2"></div>
 <figure>
-  <svg xmlns="http://www.w3.org/2000/svg" width="86%" viewBox="0 0 1000 800">
+  <svg xmlns="http://www.w3.org/2000/svg" width="74%" viewBox="0 0 1000 800">
 <title>Chaining and linear probing search costs</title>
 <rect width="100%" height="100%" fill="white"/>
 <text x="500" y="30" text-anchor="middle" font-family="sans-serif" font-size="20">Measured and theoretical probe counts</text>
@@ -175,6 +175,9 @@
   <li><b>하지 않은 일을 끝난 것처럼 처리했다.</b> 1단계에서 체크리스트 항목(브라우저 채팅 AI와 비교)이 남아 있는데도 이슈를 닫았다. 체크리스트와 댓글을 대조해 다시 열고 상태를 바로잡았다. 이 경험으로 "테스트 통과"나 "완료" 보고를 그대로 믿지 않고, 이슈 체크리스트와 실제 결과물을 직접 대조하게 되었다.</li>
 </ul>
 <p class="small">남은 한계: 단축기의 테이블은 칸 수 101로 고정이라, 선형 탐지 단축기는 102번째 URL에서 <code>OverflowError</code>가 난다(체이닝은 계속 동작). 서버는 이 오류를 처리하지 않는다. 비교 실험의 키는 URL이 아니라 호너 해시값이 무작위 칸에 고르게 떨어지도록 만든 한 글자 문자열이다. 따라서 이 실험은 해시 함수 자체의 품질이 아니라 충돌 처리 방식의 차이만 비교한다.</p>
+
+<h2>6. 느낀 점</h2>
+<p>이번 과제를 하면서 AI가 정말 많이 발전했다는 것을 실감했다. 특히 GitHub에 이슈로 할 일을 등록하고, 에이전트가 그 이슈를 하나씩 처리하게 하는 방식으로 작업을 자동화하는 방법을 배울 수 있어서 좋았다. 보충 시간이 전혀 아깝지 않을 만큼 의미 있는 시간이었다.</p>
 
 </body>
 </html>
